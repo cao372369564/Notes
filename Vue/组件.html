@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>组件</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        ul{
+            margin-top: 10px;
+            margin-left: 10px;
+            display: inline-block;
+            background-color: red;
+            padding: 20px;
+            border: 1px solid black;
+        }
+        li{
+            display: flex;
+            flex-direction: row;
+            /* justify-content: space-between; */
+            background-color: #fff;
+            padding: 10px;
+        }
+        .img-box{
+            width: 230px;
+            height: 130px;
+            position: relative;
+        }
+        img{
+            width: 230px;
+            height: 130px;
+        }
+        .numCount{
+            position: absolute;
+            bottom: 3px;
+            background-color: #333;
+            font-size: 14px;
+            color: #eee;
+            width: 100%;
+            text-align: center;
+        }
+        /* img-box结束 */
+
+        .container{
+            margin-left: 20px;
+            padding: 7px;
+            /* border: 1px solid black; */
+        }
+        .title{
+            font-size: 18px;
+        }
+        .free{
+            font-size: 17px;
+            color: rgb(19, 226, 98);
+        }
+        .playback{
+            display: inline-block;
+            margin-top: 2px;
+            padding: 2px;
+            font-size: 14px;
+            color: rgb(53, 96, 212);
+            border: 1px solid rgb(53, 96, 212);
+        }
+        .price{
+            color: #f40;
+            display: block;
+        }
+        /* container 结束 */
+        .choose{
+            opacity: 0.3
+        }
+        .total{
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-weight: 700;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="app">
+        <course-list :list='courseList' @price='getPrice' :ceshi='ceshi' @click.native='onClick'></course-list>
+        <!-- 在自定义组件上写@click就必须要用$emit写一个自定事件名为click，且在子组件内部写方法内容，
+            若不想这么麻烦，则可以使用原生事件，原生事件可以这样写@click.native，此时就不用再自定义事件名了 -->
+        <course-list :list='courseList' @price='getPrice' :ceshi='ceshi'></course-list>
+
+        <div class='total'>合计 : {{ price }}</div>
+        
+        
+    </div>
+
+
+    <!-- 父组件不能直接获取子组件和实例化对象内部的值，需要传值给父组件才能使用 -->
+    <script>
+
+        const courseList = {
+            props : {
+                list : {
+                    type : Array,
+                    default : [],
+                    required : true
+                },
+                ceshi : Number
+                //从父组件接收一个Number类型的值，Vue规定，从父组件接收过来的值，不能修改，
+                //所以需要赋一个新变量，从父组件接收过来不能修改的变量叫"单向数据流"
+            },
+            data (){
+                return {
+                    totalPriceArr : [],
+                    alreadyhasArr : [],
+                    totalPrice : 0,
+                    num : this.ceshi,
+                    //这里将父组件的值保存在一个变量中，以下courseList也是这个方法
+                    courseList : this.list.concat([])
+                    //引用值的深度克隆可以利用concat链接一个空数组执行,得到的就是一个新对象
+                }
+            },
+            template : `<ul>
+                            {{ num }}
+                            <li v-for='(item,index) in courseList'
+                                :key='item.name' @click="addToBuy(index,item.price)"
+                                :class="{choose : alreadyhasArr[index] }"
+                                @contextmenu.prevent='removeFromBuy(index,item.price)'>
+                                <div class="img-box">
+                                    <img :src="item.poster" alt="图片">
+                                    <span class='numCount' v-if='item.enrollment'>{{item.enrollment}}人报名</span>
+                                    <span class='numCount' v-if='item.buyNumber'>{{item.buyNumber}}人购买</span>
+                                </div>
+                                <div class="container">
+                                    <div class="title">{{item.name}}</div>
+                                    <div class="free" v-if='item.free'>免费</div>
+                                    <span class="playback" v-if='item.playback'>回放</span>
+                                    <div class="price" v-if='item.price'>￥{{item.price}}</div>
+                                </div>
+                            </li>
+                        </ul>`,
+            methods : {
+               
+                addToBuy (index,price){
+
+                    // if( this.alreadyhasArr[index] ){
+                    //     return
+                    // }
+
+                    // this.totalPriceArr.push(price)
+
+                    // // this.alreadyhasArr[index] = true;
+                    // this.$set(this.alreadyhasArr,index,true)
+                    // // this.$set可以引发vue视图的改变，
+                    // //而this.alreadyhasArr[index] = true的赋值则不能触发视图更新
+                    // this.getTotalPrice()
+                    // // console.log(this.totalPrice)
+                    this.num --
+                    this.courseList.splice(index,1)
+                },
+
+                removeFromBuy(index,price){
+
+                    if(!this.alreadyhasArr[index]){
+                        return
+                    }
+
+                    const totalPriceIndex = this.totalPriceArr.findIndex( value => {
+                        return value == price
+                    } )
+
+                    this.alreadyhasArr.splice(index,1,false)
+                    this.totalPriceArr.splice(totalPriceIndex,1)
+                    this.getTotalPrice()
+                    // console.log( this.totalPrice )
+                },
+                getTotalPrice (){
+
+                    if(this.totalPriceArr.length == 0){
+                        this.totalPrice = 0
+                    //当总价格数组长度为0的时候，一定要让totalPrice = 0，
+                    //否则虽然长度为零，但是最后移除的一位则还在 合计 当中不能移除
+                    }else{
+                        this.totalPrice = this.totalPriceArr.reduce( (prev,cur) => {
+                            return prev + cur
+                        } )
+                    }
+
+                    this.$emit('price',this.totalPrice)
+                    //自定义事件，传参的第一位是事件名字，
+                    //第二位则是事件可以有一个参数可以被接收
+                    //这里是为了子组件向父组件传值
+                }
+            }
+        }
+
+        const vm = new Vue({
+            el : '#app',
+            components : {
+                courseList
+            },
+            data : {
+                price : 0,
+                ceshi : 10,
+                courseList : 
+                [{
+                    name : "web前端开发之javascript基础知识【渡一教育】",
+                    free : true,
+                    playback : false,
+                    price : 0,
+                    buyNumber : 0,
+                    enrollment : 4942,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLBsSud06XlZnJACsTWd7OSA5phIFPRTNibFBeuT8jRjy00Jb5ticSEKYUnpUYdBCicH2U/356"
+                },{
+                    name : "Web前端开发之HTML+CSS精英课堂【渡一教育】",
+                    free : true,
+                    playback : false,
+                    price : 0,
+                    buyNumber : 0,
+                    enrollment : 1742,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLBDFLdArBwf70PjMrL6bq0OI9LesEsskk1iamJKibriaic0QkBZhINoDuN0DicaojkqyQjk/356"
+                },{
+                    name : "Web前端开发高级工程师就业班第五期【渡一教育】",
+                    free : false,
+                    playback : true,
+                    price : 9.9,
+                    buyNumber : 2514,
+                    enrollment : 0,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLARyeukEbZaoH81tXcYiaYUOgibrdWN8agFSkT5icdVsQ9TqFtcKglkwcZQ4XialV0jUics/356",
+                },{
+                    name : "Web前端开发高级工程师进阶班第五期【渡一教育】",
+                    free : false,
+                    playback : true,
+                    price : 399,
+                    buyNumber : 431,
+                    enrollment : 0,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLARyeukEbZaoH81tXcYiaYUOgibrdWN8agFSkT5icdVsQ9TqFtcKglkwcZQ4XialV0jUics/356",
+
+                },{
+                    name : "原生JS扫雷游戏实战开发【渡一教育】",
+                    free : true,
+                    playback : false,
+                    price : 0,
+                    buyNumber : 0,
+                    enrollment : 631,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLARyeukEbZaoH81tXcYiaYUOgibrdWN8agFSkT5icdVsQ9TqFtcKglkwcZQ4XialV0jUics/356",
+
+                },{
+                    name : "你不知道的Javascript【渡一教育】",
+                    free : true,
+                    playback : false,
+                    price : 0,
+                    buyNumber : 0,
+                    enrollment : 1696,
+                    poster : "https://10.url.cn/qqcourse_logo_ng/ajNVdqHZLLARyeukEbZaoH81tXcYiaYUOgibrdWN8agFSkT5icdVsQ9TqFtcKglkwcZQ4XialV0jUics/356",
+
+                }]        
+            },
+            methods : {
+                getPrice(price){
+                    this.price = price;
+                },
+                onClick(){
+                    console.log(111)
+                }
+            }
+            
+        })
+    </script>
+
+    
+
+</body>
+</html>

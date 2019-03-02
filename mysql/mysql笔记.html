@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+
+        // 创建数据库
+        //     常用数据类型    type
+        //         int        整数型
+        //         bigint()   长整数型，括号内填长度
+        //         float      浮点型
+        //         double     双精度浮点型
+        //         varchar()  字符串
+        //         text       文本
+
+        // // MySQL每一张表都必须有主键,主键不能有逻辑,不能为空,没有实际意义，是唯一标识的
+        //     auto increament   自动增加
+        //     primary key     主键    (只允许主键勾选)
+        //     设置主键（勾选primary key,因为其本身就是唯一的，所以不勾选unique）
+
+// ------------------------------------------------------------------------
+
+        // 两种方法操作改变可输入中文字符
+        //     一、在datagrip 中创建的主库下写上这样的语句
+        //         show database;
+        //         use school;
+        //         alter database school character set utf8;
+        //         alter table student default character set utf8;
+        //         alter table student convert to character set uft8;
+
+        //     二、mysql workbench(工作台) 的数据库操作 
+        //         1.从屏幕左下角'开始'中寻找mysql文件夹，找到mysql下的 Mysql workbench ，打开
+        //         2.欢迎界面中 靠近左侧栏的( MySQL Connections + ,Local instance..)字样的，双击,输入密码
+        //         3.在左侧 Navigator底部，切换Administration 和Schemas, 然后选择你已经创建的库，
+        //         指针右侧的扳手打开，在里面修改charset/collation 分别是 utf8  utf8_general_ci,
+        //         然后打开创建的table，再次如上操作, 在选中表格每一行再次操作           
+
+// --------------------------------------------------------------------------------
+
+        // 数据库的增删改查
+        //     增 ： 在主库命令行输入 
+        //             insert into student(`stu_num`,`name`,`age`,`class`)
+        //                                 模板字符串里面填写所创建的标题名字
+        //             values(2,"猴子",20,2)
+        //                                 values里面则依次填写值
+        //     改 ： 在主库命令行输入
+        //             update student set age = 18 where name = "熊猫"
+        //                 修改要注意下，一定要加上where 指明修改的是哪里的age
+        //         如果修改多个则用" , "隔开，像这样
+        //             update student set age = 18,class = 3 where name = "熊猫";
+        //     查 ： 在主库命令行输入
+        //         select * from student; 库小则可以这么写，如果是很大的库切忌用" * ";
+        //         可以这么输入 
+        //                 select age,name,class from student;
+        //             也可以输入条件查询，像这样 ：
+        //                 select name from student where age = 18;
+        //                     也可加条件 用and 或者or
+        //             查询人数总和 则可用内部的函数,如下操作 (求数就是count(1)  )
+        //                 select count(1) from student;
+        //             还可增加条件,如下操作
+        //                 select count(1) from student where age = 18;
+        //             求其他的值的和
+        //                 select sum(age) from student;
+        //             求平均数
+        //                 select avg(age) as avg_age from student;(as可以取别名,最后显示的是avg_age)
+        //             分组操作求和
+        //                 select count(1) from student group by class;(通过班级分组求每班人数)
+        //                 也可以这样写
+        //                 select class,count(1) from student group by class;
+        //                 (只有group by的class，才能被写在前面，没有分组的则不能)
+        //         偏移翻页
+        //             select * from student limit 2,2;
+        //                 (限制第二页的前两个，一个数则只显示2个)
+        //         倒序排列
+        //             select * from student order by id desc;
+        //                 (不写desc就是正序，写了就是倒序)
+        //             倒序之后也可以翻页限制
+        //                 select * from student order by id desc limit 3,2;
+
+        //     删 ： delete from student where name = '小猫'
+        //             切忌不要直接写 delete from student，这样的话student表格
+        //             所有数据都没了，别拿工资了，直接跑路吧。
+
+
+    </script>
+
+</body>
+</html>
