@@ -224,10 +224,80 @@ Git是在linux操作系统上，用C语言实现的‘分布式版本管理工�
 	推送本地其他分支，比如dev，就改成 ：
 		git push origin dev
 
+<<<<<<< HEAD
 	
 
 	
 ==============================================================
+=======
+====通常多人开发，大家都会克隆一份往master和dev分支上推送各自的修改
+		git clone git@github.com:账户名/仓库名.git
+	克隆下来的内容只能看到master主线，看不到其他分支，可以查看一下 ：
+		git branch
+	如果小伙伴要在本地的dev分支开发，就必须要创建远程origin的dev分支 ：
+		git checkout -b dev origin/dev
+	然后，他就会在本地dev上继续修改，并不定时push一下本地dev分支到远程：
+		git add 文件名
+		git commit -m "备注"
+		git push origin dev
+====恰巧，你也对这个文件做了修改，并试图推送
+		git add 文件名
+		git commit -m "备注"
+		git push origin dev
+====这个时候就会显示推送失败，因为小伙伴的推送和你的推送冲突了，这个时候，
+====就需要把他的提交从origin/dev抓取下来，在本地合并，再推送:
+		git pull 
+====git pull 也失败了，因为没指定本地dev分支与远程origin/dev分支的链接，
+====根据提示，设置dev和origin/dev的链接
+		git branch --set-upstream-to=origin/dev dev
+	再次拉取 :
+		git pull 
+====提示成功，但合并还有冲突，解决办法和分支管理中解决冲突一样，解决完,
+====提交并push ：
+		git commit -m "备注"
+		git push origin dev
+
+==============================================================
+==========================标签管理=============================
+
+（一）创建标签
+	打标签，虽然每次提交后git都会随机分配一个版本号，但是这一大串数字
+	多了也难免不好找到，所以就有了标签管理这一说
+		1.切换到需要打标签的分支上 ： 
+			git checkout master 
+		2.敲命令打开一个新标签
+			git tag v1.0
+========查看所有标签 ： git tag
+	默认标签打在最新提交的commit上，有的时候是之前的commit忘记打标签，
+	则可以找到历史提交的commit id,打上
+		git log --graph --pretty=oneline --abbrev-commit
+		git tag v1.0 commitID
+	标签不是按照时间顺序列出来的，而是字母顺序，查看具体某个标签详细信息
+	可以用git show <tagname>
+		git show v1.0
+====还可以更详细一点 -a指定标签名，-m指定备注信息
+		git tag -a v1.0 -m "version 0.1 released" commitID
+
+====标签总是和某个commit挂钩
+====如果commit既出现在master主线，又出现在dev分支，这两个分支都能看到
+
+（二）操作标签
+	标签打错了，可以删除
+		git tag -d v0.1
+====如果要推送标签到github，使用命令 git push origin <tagname>
+		git push origin v1.0
+====或者一次性推送还没有推送到github的标签
+		git push origin --tags
+====如果要删除github上的标签
+		先从本地删除
+			git tag -d v1.0
+		再删除github标签
+			git push origin :refs/tags/v1.0
+			
+
+==============================================================
+
+>>>>>>> dev
 
 	<!--=======================================================
 
@@ -245,7 +315,12 @@ Git是在linux操作系统上，用C语言实现的‘分布式版本管理工�
 		git reflog
 	查看历史修改的图表 ：
 		git --graph
+<<<<<<< HEAD
 
+=======
+	只查看历史提交的备注时间线 ：
+		git --graph --pretty=oneline --abbrev-commit
+>>>>>>> dev
 	查看修改日志 ：
 		(git log命令中显示从最近到最远的提交日志，一共会显示3次提交，
 		最近的一次叫append GPL，上一次叫add distributed，
