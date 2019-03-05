@@ -260,6 +260,20 @@ Git是在linux操作系统上，用C语言实现的‘分布式版本管理工�
 		2.敲命令打开一个新标签
 			git tag v1.0
 ========查看所有标签 ： git tag
+	默认标签打在最新提交的commit上，有的时候是之前的commit忘记打标签，
+	则可以找到历史提交的commit id,打上
+		git log --graph --pretty=oneline --abbrev-commit
+		git tag v1.0 commitID
+	标签不是按照时间顺序列出来的，而是字母顺序，查看具体某个标签详细信息
+	可以用git show <tagname>
+		git show v1.0
+====还可以更详细一点 -a指定标签名，-m指定备注信息
+		git tag -a v1.0 -m "version 0.1 released" commitID
+
+====标签总是和某个commit挂钩
+====如果commit既出现在master主线，又出现在dev分支，这两个分支都能看到
+
+
 ==============================================================
 
 
