@@ -371,8 +371,10 @@ Git是在linux操作系统上，用C语言实现的‘分布式版本管理工�
 	删除远程仓库 ：
 		git remote rm origin
 	
-	添加并切换远程仓库分支 ：
+	添加远程仓库分支，(在本地没有创建分支的时候，这样写) :
 		git checkout -b dev origin/dev
+				(本地有dev分支的话直接 git push origin dev,
+				这样远程仓库就会自动创建一个和本地仓库分支名对应的dev分支)
 	查询远程所有分支 ： 
 		git branch -a
 	删除远程分支 : 
