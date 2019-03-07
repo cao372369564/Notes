@@ -7,6 +7,26 @@
     <title>Vue cli各个文件功能介绍</title>
 </head>
 <body>
+=========================================================
+前言 ：vue中的import、export和export default的注意问题
+    import
+        1.引入一个依赖包的时候，是不需要相对路径的
+        2.引入一个自己写的js文件，则需要相对路径。
+        3.什么情况下import需要用{}引入,什么情况下只用一个变量？
+            (1). 用export抛出的变量需要用{}
+            (2). 用export default跑出的变量，只需要自己起一个名字
+            就可以了 ：
+                例: a.js文件中
+                        var obj = {name : '渣渣辉'};
+                        export default obj;
+                    b.js文件中
+                        import aaa from './a.js'
+                        console.log(aaa.name)
+    export default和export
+        1.一个js文件中只能有一个export default
+        2.一个js文件可以有很多歌 export
+        3.导出export或export default的js文件自己也可以使用
+
 ================================================================
 *****************************************************************
 
@@ -28,9 +48,118 @@ components                   组件
 App.vue                      根组件
 main.js                      主入口配置文件,作用于主入口文件
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^vue router 安装与使用^^^^^^^^^^^^^^^^^^^^^^^^^^
+安装router！命令行 ：
+        vue add router
+--------提示 是否需要“对路由器使用历史记录模式”，第一次选 “no”
+完成之后，vue create的文件夹会多出来2个文件
+        view        ----------里面放的是点击页面链接后切换到另一个地方的一个组件
+        router.js   ----------配置好的路由，路径。
+之后在命令行启动服务器 : 
+        npm run serve
+在浏览器中打开 ： 
+        localhost:8080
+
+=================下面是主入口文件内容的书写==========================
+                    ----main.js----
+node_modules当中会有一个叫vue-router的文件夹，里面的文件写了一个构造函数，
+如果要使用，则可以用 import Router from "vue-router",Router就是构造函数
+----然后 Vue.use(Router)就相当于使用了它。
+----接下来就是就是实例化这个router了 ：
+        const myRouter = new Router({
+<!-- 这个routes是一个路径，value值是一个数组形式，每一位都是一个对象形式 -->
+            routes : [
+                {
+<!-- path定义一个路径，里面的‘/’，表示的就是'localhost:8080/#/'后面的内容 -->
+<!-- path的value值,在App.vue中的router-link标签中没有配置，如果写path:'/aaa'，
+这个网页将不会显示内容,只能手动在网址后面添加'aaa'字样才能显示 -->
+                    path : '/',
+<!-- component是一个组件,所以是单数,没有‘s’, 它的值写import后面的那个名字，
+    value值是一个变量,不是字符串,它显示导进来的组件名字-->
+                    component : Home
+                }
+            ]
+        })
+----配置完这个路由，就可以把这个路由放进Vue实例化对象里面了，
+        new Vue({
+    <!-- 这里router属性的书写，和局部组件书写没什么区别 -->
+            router : myRouter,
+            render : h => h(App)
+        }).mount('#app')
+
+----配置完，所有东西都会再次显示出来了，但是网址当中莫名有一个'#',很不爽，怎么去掉呢？
+----还记得安装vue router的时候，提示说'是否使用历史记录模式'那句话吗,现在用上了
+        在之前写的实例化router对象里面，添加一个属性 mode : 'history' ,
+    保存刷新以后，从新输入网址localhost:8080,发现没有让人不爽的#了
+
+***********在根组件App.vue当中自己写页面内容
+书接上文，要把根组件中，也就是vue接管的#app标签中的内容都注释掉，自己写两个跳转标签，
+也就是这样 :
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    这样自己写跳转页面，在协议域名端口都相同的情况下，测试了一下，发现有问题，
+页面的网址后面虽然跳转了，但是页面似乎没动静啊！怎么样让它既网址跳转，页面内容也切换，
+怎么办呢？  别着急，不用自己写，vue-cli设计了一个标签叫 ： 
+        <router-view></router-view>
+    翻译过来叫‘路由视图’，它对应的就是路由配置component的显示区，可以完美的切换
+    出来a标签的功能 ： 
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+    <!-- 这个router-view标签虽然好，但是也别把a标签包裹起来，
+    可能是因为不兼容吧，包裹进去之后，什么也不显示，有兴趣你可以研究一下-->
+            <router-view></router-view>
+    尝试一下，成功了！但是，你再多点几下这标签，又有新问题了，一直点击同一个a标签，
+就会一直跳转，耗费了很多网络性能，怎么办呢?vue-cli又提供了另一个标签：
+            <router-link></router-link>
+    这个标签，可以做到a标签做不到的事情，重复点同一个标签，不会进行多次网络请求,
+岂不是更省事，把上面的a标签注释掉，然后这样写 ：
+            <router-link>Home</router-link>
+            <router-link>About</router-link>
+    <!-- 同样，router-link在router-view标签里面不显示，一定不要写错了 -->
+            <router-view></router-view>
+    保存之后，发现跳转标签，并没有显示出来，为什么?当然是因为没写跳转到哪里阿，
+于是，再加上一个router-link本身的属性 to，它和a标签中的href有一样的功能 ：
+            <router-link to="/">Home</router-link>
+            <router-link to="/about">About</router-link>
+            <router-view></router-view>
+    到此，一个基本的页面就已经布置完了，但是我想让标签内容跟我的数据绑定在一块，
+动态显示不同的数据！
+    在 template标签下面，写一个script标签 ：
+            <script>
+                export default {
+                //和实例化vue中的局部组件写法一样
+                    data(){
+                        return {
+                    // 绑定上面router-link中的属性'to'
+                            homeLink : '/',
+                            aboutLink : '/about'
+                        }
+                    }
+                }
+            </script>
+    在接下来，绑定属性"to",便可以用data里面的变量 ： 
+            <router-link :to="homeLink">Home</router-link>
+            <router-link :to="aboutLink">About</router-link>
+            <router-view></router-view>
+    保存刷新，效果一样！现在不想在我自己的代码中写script标签，我觉得有点乱，
+在别的文件中写行不行？
+    行！回到最main.js文件当中的路由配置，Router下的routes，在这个数组当中，
+vue还提供了一个可配置的name属性，name就是路由的名字，value必须是字符串,这样
+通过这个名字就可以链接到跳转的位置了 ： 
+            <router-link :to="{name : 'home'}"></router-link>
+    <!-- 书写路由配置的名字的时候，绑定的必须是一个对象形式 -->
+    <!-- 如果对象里面的value值不写成字符串格式，vue就会找data里面的数据 -->
+            <router-link :to="{name : 'about'}"></router-link>
+            <router-view></router-view>
 
 *****************************************************************
 ================================================================
+
+        
+    
+
+
 
 </body>
 </html>
