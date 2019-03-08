@@ -146,14 +146,16 @@ node_modules当中会有一个叫vue-router的文件夹，里面的文件写了�
 在别的文件中写行不行？
     行！回到最main.js文件当中的路由配置，Router下的routes，在这个数组当中，
 vue还提供了一个可配置的name属性，name就是路由的名字，value必须是字符串,这样
-通过这个名字就可以链接到跳转的位置了 ： 
+通过这个名字找到router.js中routes配置下path的路径，然后跳转 ： 
+    <!-- name属性，可以让router-link标签直接跳转到routes配置好的path下 -->
             <router-link :to="{name : 'home'}"></router-link>
-    <!-- 书写路由配置的名字的时候，绑定的必须是一个对象形式 -->
-    <!-- 如果对象里面的value值不写成字符串格式，vue就会找data里面的数据 -->
+<!-- 书写路由配置的名字的时候，绑定的必须是一个对象形式 -->
+<!-- 如果对象里面的value值不写成字符串格式，而是变量，vue就会找data里面的数据 -->
             <router-link :to="{name : 'about'}"></router-link>
             <router-view></router-view>
 
 *****************************************************************
+<<<<<<< HEAD
 ================================================================
 ***************************路由和嵌套路由*************************
 
@@ -172,5 +174,67 @@ vue还提供了一个可配置的name属性，name就是路由的名字，value�
     5. 在根组件中简单布局，书写样式,并在main.js中用import引入
 
 
+=======
+==================================================================
+
+        
+    
+··························嵌套路由后半段····························
+    在views中，每一个组件都是第一层路由，但一层路由往往不够，还需要嵌套
+嵌套路由如果也写在views难免有些混乱，找不到哪里是哪里，所以二层嵌套路由
+选择在src文件夹下的components文件夹里面创建一个文件夹用来放置第一层路由
+的嵌套路由
+    写嵌套路由的名字，首位字母也要大写，创建完成之后，同样，也是在router.js
+中用import引入文件,并配置它的子路由：
+            routes : [
+                {
+                    path : '/commity',
+                    name : 'commity',
+                    component : Commity,
+        <!-- 这个children就是要放置嵌套路由的配置，和routes一样 -->
+                    children : [
+                        {}
+                    ]
+                }
+            ]
+    这样也就配置好了第一层路由的嵌套路由了,下面就到写嵌套路由的内容了，在哪写？
+当然是在views中的commity中写了，路由书写顺序：
+            1.书写引入路由文件
+            2.router.js引入并配置
+            3.在父级路由中写标签router-link和router-view,并绑定属性to
+            4.保存测试嵌套路由是否显示
+    结束之后，我又想在顶部nav中加一个class，让选中的li上加一个下划线，怎么办？
+打开F12，选中一个第一层路由的任意一个，会发现，vue会自动加一个class，名字是
+router-link-active和router-link-exact-active，我们先讨论前一个class，只要在
+前一个类名上添加就样式就比自己写省事多了
+            .router-link-active{
+                你要设置的样式1
+                你要设置的样式2
+                ...
+            }
+    但是发现有问题啊，为啥li中‘首页’它的样式会一直存在,没有跟随点击切换类名？
+别着急，我来告诉你，因为router-link标签的to属性，是一个字符串，vue会给这个to
+属性加class，‘首页’这个path字符串是'/'，而别的比如是community则是'/commiunity',
+他是包含了一个‘/’,所以这个class在给community添加类名的时候，同时也给‘首页’添加
+了class类名，解决办法就是：
+    把router-link标签中to属性改成/home，router.js中path='/'也改成/home，就不
+存在包含和被包含了。
+    <!-- 如果点击嵌套路由也想让父级路由的class存在，让path路径跟着父级路由下来 -->
+    <!-- router-link-exact-active是精确匹配原则，也就是只有被点击的router被匹配到 -->
+    router-link-active默认全包含匹配原则，意思是path名全包含在当前router path名，
+开头的router也会被匹配到。
+            1.<router-link to='/'>
+            2.<router-link to='/a'>
+            3.<router-link to='/b'>
+            4.<router-link to='/ab'>
+    2或3被选中，1号也会被匹配到router-link-active,4号被选中1号2号也会被匹配到
+router-link-active。可以通过router添加exact属性改变为精确匹配。
+
+    如果嫌这两个类名比较长，不好记，想简短一点，也可以！首先回到router.js中，在
+实例化new Router({}),重新配置它的类名：
+                linkActiveClass : 'active'
+                linkExactActiveClass : 'exact'
+    完成之后，样式里面的类名也需要改一下
+>>>>>>> refs/remotes/origin/dev
 </body>
 </html>
