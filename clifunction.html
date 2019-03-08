@@ -155,8 +155,6 @@ vue还提供了一个可配置的name属性，name就是路由的名字，value�
             <router-view></router-view>
 
 *****************************************************************
-<<<<<<< HEAD
-================================================================
 ***************************路由和嵌套路由*************************
 
 在vue create的文件中编辑，
@@ -174,10 +172,7 @@ vue还提供了一个可配置的name属性，name就是路由的名字，value�
     5. 在根组件中简单布局，书写样式,并在main.js中用import引入
 
 
-=======
-==================================================================
-
-        
+==================================================================        
     
 ··························嵌套路由后半段····························
     在views中，每一个组件都是第一层路由，但一层路由往往不够，还需要嵌套
@@ -234,7 +229,72 @@ router-link-active。可以通过router添加exact属性改变为精确匹配。
 实例化new Router({}),重新配置它的类名：
                 linkActiveClass : 'active'
                 linkExactActiveClass : 'exact'
-    完成之后，样式里面的类名也需要改一下
->>>>>>> refs/remotes/origin/dev
+    完成之后，样式里面的类名也需要改一下!
+<!-- 在写各个路由组件的时候，style样式会相互影响，如果不想他们的样式互相影响，可以这样 -->
+                <style scoped>
+                </style>
+<!-- 加上 scoped之后，这个路由的样式将不会影响其他路由 -->
+
+===============================================================================
+===============================================================================
+
+~~~~~~~~~~动态路由
+    router.js中，配置路由routes中path的路径不固定，就是不固定的路由，形式这样写：
+                path: '/question/:id'
+    这个 :id, vue就会认为它是一个动态路由。
+    重新写一个嵌套组件在components中,并在router.js引入和配置
+                import Question from './components/Question.vue'
+                routes : [{
+    <!-- 这个配置放在跟一级路由配置的尾部 -->
+                    path: '/question/:id',
+                    name: 'question',
+                    component: Question
+                }]
+    在Academic.vue中，把li改成router-link，并绑定to属性，value值写成一个对象
+{name:'question'}，这个对象中的name的value值引入router.js中路由配置下name值为
+question对应的path值。
+    如果要传path路径中question/:id这个绑定的动态id，可以在:to的属性值里面再添加
+    <!-- {name:'question',params:{item.questionId}} -->
+一个属性params,这个属性是一个对象，对象里面写的是path路径中绑定的动态id
+
+===||实现点击 ‘学术讨论’下面的li中的某一项，让问题的 后面也显示出来这个 li里面的内容||
+
+————————这里要补充一个生命周期函数 
+    created声明周期函数，这个函数里面,this、data、methods这些数据都初始化完毕了，
+在这个生命周期函数中,this是一个对象，包含了很多个方法，当然也包括router路由，
+这里面有两个关于路由的，($route和$router),$router是VueRouter的实例，相当于一个
+全局的路由器对象；$route则是当前正在跳转的路由对象，可以从中获取name.path,params,
+query等，所以这里为了传参，用的肯定是$route
+    既然找到了$route, 那就要使用它，这里用到的是这个id值，所以先取出来
+                const questionId = this.$route.params.id;
+    还会用到与其相关的index索引值，这里用到一个es6的方法 : 
+                const index = this.questionList.findIndex( item => this.questionId == questionId )
+    <!-- 这里的[]就是data数据中的数组，这里执行的结果如果有的话返回对应索引值，没有返回-1 -->
+
+    在data中设置一个question，value值为空字符串 ：
+                this.question = this.questionList[index].title
+    这样，很巧妙的就取到data里面这个数组中的任何属性和值
+    最后，在template下的div下的 问题 后加上 {{ question }}，大功告成
+
+====||实现点击社区，就能直接默认显示一个子路由的内容||
+    提示 ： 利用服务器重定向
+        回到router.js中，vue还提供一个属性，就是为了解决这个问题的
+        在要设置默认显示的路由下面，添加redirect属性，value值为要显示的path路径
+        
+====||如果用户在网址输入不存在的id号，该怎么办？||
+    提示 ： 输入不存在的id，让其跳转到报错页面
+    首先要写一个容错处理，这个id号不存在，findIndex值就是-1，还要在components写
+一个组件，让用户输入不存在的id号跳转到这个页面
+                if(index == -1){
+    <!-- 这个实例化对象中有replace方法，可以替换页面跳转指定页面 -->
+    <!-- 里面既可以直接传path路径，又可以写成对象形式{name:'err'} -->
+                    this.$router.replace('')
+                }else{
+                    this.requestion = this.requestionList[index].title
+                }
+    除了用this.$router.replace('')可以替换网页，this.$router.push('')同样可以，
+他们在不同的场景选择用哪个方法，具体比较请百度。
+
+
 </body>
 </html>
