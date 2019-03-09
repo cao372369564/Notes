@@ -433,6 +433,62 @@ component是个单数，表示一个，如果想表示多个就把它写成"comp
                 <!-- 在这个对象里面任意定义属性，这里定义了login登录信息 -->
                     login : false
                 }
+    这个meta对象的属性既可以在/commity的路径下取到，又能在它的子路由下取到,在子路由
+Personal.vue里面，创建 created生命周期函数，打印this，就可以在this对象里面的$route对象
+中的match数组第[0]位中有名为meta的对象，这里面放的就是父路由设置的login信息.
+                created(){
+                    const loginFlag = this.$route.matched[0].meta.login
+                }
+    接下来的事就简单了，写一个登录按钮，让这个login信息每次取反，作为登录信息
+    <!-- button按钮上的信息也可以用login控制，为true的时候显示退出，false显示登录 -->
+                <button @click='handleClick'>{{ loginFlag ? "退出" : "登录" }} </button>
+    <!-- 一定不要在created生命周期函数中定义变量,因为methods,访问不到 -->
+                data (){
+                    return {
+                        loginFlag : false
+                    }
+                }
+                methods : {
+                    handleClick(){
+                        每次点击loginFlag值取反，然后再赋值
+                        给this.$route.matched[0].meta.login
+                    }
+                }
+    现在personal.vue中已经实现了登录，接下来要实现acadedmic中login信息的录入，切换到
+Academic.vue中 ： 
+    <!-- 这个组件里面，因为守卫还没有允许通过,在beforeRouterEnter函数结束前，就还没有进入
+        这个组件，实例也就还没有创建,所以this的值这里是undefined -->
+                const isLogin = this.$route.matched[0].meta.login
+    <!-- 不能用this,但是这个beforeRouteEnter里面的to形参,里面可以找到meta对象和属性login -->
+                const isLogin = to.matched[0].meta.login
+    判断，如果是true的话,不用再继续走判断登录信息了,直接返回
+                if(isLogin){
+                    <!-- 直接跳转，然后返回,不往下执行了 -->
+                    next()
+                    return
+                }
+    注意 ：meta这个可以自定义属性的对象,只能子路由传给父路由,不能兄弟路由传递,有局限性
+    这里注释掉首页的router-view标签，不用它,并在router.js中注释掉components中的
+academic属性,只让路由拦截社区就可以了
+    
+    ||实现离开academic页面,显示提示信息,确认后离开,取消留在此页面||
+
+        同样也是用组件内守卫实现,vue提供一个beforeRouteLeave,用来确认是否离开当前
+    此页面
+            <!-- 同样接收这三个参数 -->
+                beforeRouteLeave(to,from,next){
+                    const answer = confirm('确定要离开吗？')
+                    if(answer){
+                        next()
+                    }else{
+                        next(false)
+                    }
+                }
+    
+=========================================================================================
+========================================路由懒加载========================================
+    输入网址后，只显示首屏内容，点击其他路由的时候，再去加载其他路由的信息，这样做可以优化用户体验
+    回到router.js中，将import引入的相对路径都注释掉
 
 
 
