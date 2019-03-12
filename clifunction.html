@@ -529,7 +529,62 @@ bus,当它触发一个方法时,也就可以监听自己的方法.
     下载完,回到vue-app文件夹会发现多了 store.js文件,可以看到vuex也是一个构造函
 数,Vuex.Store是vuex对象的一个方法,这个方法里面的参数又是一个对象,这个对象又包含
 三个子对象,state、mutations、actions
-    state对象,作用是公共数据池
+    state对象,是公共数据池,可以把要传的值放在这里,
+    例如 : state :{
+        name : '王某某'
+    }
+    这个时候，兄弟组件就都不用传值了，可以直接在标签内这样写： {{ $store.state.name }},
+在兄弟组件methods中，定义方法来改变这个值，
+            data : {
+                storeName : this.$store.state.name 
+            },
+            methods : {
+                storeName = '老曹 + 1'
+            }
+    保存刷新之后，发现页面数据并没有改变！为什么？因为this.$store.state.name是原始值，
+原始值赋值给storeName是拷贝过来，拷贝完之后，他们就没有关系了，那怎么做？vue最开始有
+一个跟methods一样，也是可以写方法的对象，叫 computed,它的函数每次可以返回一个值，并可以
+更新原来的数据
+<!-- storeName跟data中的storeName冲突了，所以写computed之前注释掉data中的storeName -->
+<!-- data的优先级高于computed -->
+            computed : {
+                storeName(){
+                    return this.$store.state.name
+                }
+            }
+    如果发现公共数据池中的数据有很多个，computed就可以改一下 ： 
+    <!-- 调用vuex中的方法 mapState之前，先import引入 -->
+<!-- 调用这个mapState方法，然后传入公共数据池中的属性值，用数组格式,每一位是字符串 -->
+            import { mapState } from 'vuex'
+            computed : mapState(['name','age','look'])
+    如果发现公共数据池的数据名跟data中的属性名重复，则在computed中更改公共数据池数据
+    <!-- 此时mapState可以接受一个对象格式 ,然后更改-->
+            computed : mapState({
+                <!-- 每一位都是一个箭头函数，return公共数据池中的数据 -->
+                storeName : state => state.name,
+                storeAge : state => state.age,
+                storeLook : state =>state.look
+            })
+    storeName,storeAge,storeLook就是被赋值的新变量，标签就可以直接用{{}}的格式写了,
+    还可以加入自己写的方法，
+            computed : {
+                mapState({
+                    storeName : state => state.name,
+                    storeAge : state => state.age,
+                    storeLook : state =>state.look
+                }),
+                <!-- 这个a函数也是一样，相当于在data中的数据 a : 111,一样 -->
+                a (){
+                    return '111'
+                }
+            }
+    标签一样可以写出来 {{a}},此时页面中显示的就是111，如果想要展开数组，就可以
+    调用es6的扩展运算符"..."，像这样 ： 
+            computed : {
+                <!-- studentList是个数组 -->
+                ...mapState(['studentList'])
+            }
+            
 
 
 
