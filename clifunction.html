@@ -584,17 +584,139 @@ bus,当它触发一个方法时,也就可以监听自己的方法.
                 <!-- studentList是个数组 -->
                 ...mapState(['studentList'])
             }
-            
+
+=================================================================================
+===================================vue getters====================================
+    同样，vuex的getters也是Vuex实例中Store方法的子对象，
+    <!-- 如果要进行正常数据池中的数据更改的话，可以再getters中进行 -->
+            new Vuex.Store({
+                state : {},
+                getters : {
+            <!-- getters相当于计算属性，里面里一个方法遍历studentList -->
+            <!-- 这个函数要实现对studentList不同的索引来做不同的操作 -->
+                    newStudent(state){
+                        return state.studentList.map( (item,index) => {
+                            if(index == 0 ){
+                                return '**' + index 
+                            }else if( index < 3){
+                                return index + '**'
+                            }else {
+                                return '++' + index + '++'
+                            }
+                        } )
+                    }
+                },
+                mutations : {},
+                actions : {}
+            })
+    写完这个函数之后，要引用store中的getters，就得在组件中也写一个这样的属性并把getters
+中的值引过来，最好是在计算属性中写。
+            computed : {
+                newStudent (){
+                    return this.$store.getters.newStudent
+                }
+            }
+    组件拿到这个数组之后，就可以遍历它了。
+    当然你可能还会想到既然有mapState，会不会有mapGetters？肯定有的
+        在组件中引入mapGetters
+            import {mapGetters} from "vuex"
+        然后在计算属性中运用扩展运算符
+            computed : {
+                ...mapGetters(['newStudent'])
+            }
+        或者在mapGetters中传入对象形式
+            computed : {
+                ...mapGetters({
+                <!--这里的value值一定以字符串形式传入 -->
+                    student : 'newStudent'
+                })
+            }    
+        然后在标签内遍历student就可以了
+================================================================================
+    这节课对getters进行补充，getters中的方法还可以传入第二个参数，这个参数就是getters
+本身，通常传第二个参数是为了让函数操作getters中的其他函数,例如
+            getters : {
+                newStudent (state,getters){
+                    return state.studentList.map( (item,index) =>{
+                        if(index == 0){
+            <!-- 传入的这个getters就是getters对象本身，然后拿到它的子方法 -->
+                            return item + getters.a
+                        }
+                    } )
+                },
+                a(){
+                    return '111'
+                }
+            }
+==========================================vuex mutations===================================
+    vuex的公共数据池中的东西，不能随便更改，如果要更改，只能在vuex中的mutations中更改，
+否则，这样会有隐患，如果是严格模式，在其他组件中更改会导致直接报错。
+            mutations : {
+    <!-- 如果要更改数据池中的数据，只能在mutations中定义方法更改 -->
+                changeStudent (state){
+                    state.studentList.push(1)
+                }   
+            }
+    然后在其他组件中的methods中方法中调用方法commit
+            add(){
+                <!-- commit方法中的参数必须是字符串 -->
+                this.$store.commit('changeStudent')
+            }
+    但是这样你会发现，不能更改的话只能一直添加 1 ，如何解决传参的问题？
+    <!-- changeStudent只能接收2个参数 -->
+    可以在changeStudent函数中传入第二个参数，用来接收外面接收的参数，重新写一下函数 ：
+            changeStudent (state,name){
+                state.studentList.push(name)
+            }
+    然后在刚刚用到这个方法的组件中把方法改一下 : 
+            add(){
+                this.$store.commit('changeStudent',this.name)
+            }
+    这样就完美的解决了问题
+    如果还想继续给changeStudent传参怎么办？ 
+        直接把第二个参数写成对象形式就可以了
+            changeStudent(state,{name,number}){
+                state.studentList.push(name + number)
+            }
+        然后add方法改成这样
+            add(){
+                this.$store.commit('changeStudent',{this.name,number : 1})
+            }
+============================================================================
+==============================vue actions===================================
+    actions是专门用来处理异步操作的，所有的异步操作都放在这里,它里面放的
+也同样都是函数
+        <!-- ctx是一个上下文对象，可以把它看做是 store -->
+        <!-- 需要注意的事commit的第二个参数依然要传过来 -->
+        changeStudent(ctx,{name,number}){
+        <!-- actions执行mutations用commit方法， -->
+            ctx.commit('changeStudent',{name,number})
+        }
+    actions中定义的方法可以执行mutataions中的方法，ctx就是store,commit中的
+第一个参数就是mutations中函数的名字,用字符串传进来，第二个参数是{name，number}
+    所以组件中methods的add方法就不能使用commit方法了，它要换一方法执行，
+        add(){
+            this.$store.dispatch('changeStudent',{name : this.name,number : 1})
+        }
+    用异步延迟setTimeout执行它，就不会出问题了
+        changeStudent(ctx,{name,number}){
+            setTimeout( () => {
+                ctx.commit('changeStudent',{name,number})
+            },1000 )
+        }
+    
+    最后，其实还有更简便的方式，用mapActions方法，像上面的一样，先import导入，
+直接在methods中写
+        methods : {
+            ...mapActions(['changeStudent'])
+        }
+    然后在标签的@click中换成changeStudent({name,number:1})，千万不要
+忘记在这个函数中传值
 
 
-
-
-
-
-
-
-
-
+=====补充vuex的循环方法
+              dispatch       commit          mutate      render
+        vue组件 ————> actions ————> mutations ————> state ————> vue组件
 
 
 </body>
