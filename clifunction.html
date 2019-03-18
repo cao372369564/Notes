@@ -718,6 +718,67 @@ bus,当它触发一个方法时,也就可以监听自己的方法.
               dispatch       commit          mutate      render
         vue组件 ————> actions ————> mutations ————> state ————> vue组件
 
+========================================================================
+===============================vue modules==============================
+
+    模块化，为了防止vuex的store内部数据方法的冗杂，公共数据池数据太多太乱，
+getters，mutations，actions异步内的方法太乱，vuex推出模块化概念，让每个
+组件的数据和方法都抽离出来放在一个单独的空间内。例如： 
+        const student : {
+            state : {},
+            getters : {},
+            mutations : {},
+            actions : {}
+        }
+    在Vuex实例的Store()方法中，就可以这样应用
+        new Vuex.Store({
+            state : {},
+            modules : {
+                student,
+            }
+        })
+    原来组件中计算属性computed的中的方法return的属性 
+        return this.$store.state.course.courseList
+    在此时不生效，因为用了modules，所以改为这样，
+        return this.$store.state.course.courseList
+    如果还想用...mapState()，就得在mapState方法中添加一个参数 ：
+        ...mapState('course','[courseList]')
+    <!-- 一定要在第一位添加，而不是最后面添加，如果不写这个参数
+...mapState('[courseList]')找的就是根state中数据池的内容,添加的这个参数写
+modules对象中的名字 -->
+    此时还是不会显示出来，因为缺少命名空间的声明，回到store.js中，将刚刚
+创建的命名空间组件打开，在state前面加上 ：
+        namespaced : true
+        像这样 ： const student : {
+                    <!-- namespaced : true, -->
+                    state : {},
+                    getters : {},
+                    mutations : {},
+                    actions : {}
+                }
+    打注释的地方就是要修改的位置
+    
+    在修改changeCourse.vue文件中，还要修改一个位置，confirm方法中，
+this.$store.commit('changeCourse',{index,name,price})修改commit
+的第一个参数 ： 
+        commit('course/changeCourse',{index,name,price})
+    在第一个参数前面加了一个course/，意思就是找course下的changeCourse
+方法，不写找的也是默认寻找根mutations中的方法
+=====================================================
+    vuex最后，为了让store中的这两个大块的数据更加方便直观，
+采用了用import引入的方式，
+    首先在src根文件下创建一个modules文件夹，然后在modules中
+创建连个js文件，student.js和course.js,
+    然后把store中的这两个数据块剪切粘贴过来对应的文件，并保存
+    最后，用import引入过来就跟之前的效果一样了
+                import student from '@/modules/student'
+                import course from '@/modules/course'
+
+
+============自此，vue文档学习结束===========================
+    
+
+
 
 </body>
 </html>
