@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded',function (){
+            var div = document.getElementsByTagName('div')[0];
+            console.log(div)
+        })
+    </script> -->
+    <title>原生js以及ES6笔记</title>
+</head>
+<body>
+    ==============================================================================================
+    ===================================JS 时间线==================================================
+
+        1. defer延迟加载 是IE 独有的，还必须是IE9，IE写上这个标签之后，仍然可以读取script内部内容
+
+        2. async 异步加载 写上这个标签之后，不会再次读取内部js语句。只能加载外部文件
+
+        3. 动态创建script标签，被称为jsonp
+
+        4. window.onload事件只能监听到complete状态，document.readyState可以监听到loading状态，
+        但是利用document.onreadystatechange事件可以监听到interactive事件和complete事件,虽然能
+        监听到，但是这两个会一起出现在控制台，无法单独控制，如果就是让interactive单独出现，可以使用
+        原生JS另一个事件DOMContentLoaded，可以用addEventListener方法监听，但不能用
+        onreadystatechange监听，它可以在interactive状态和complete之间触发。
+
+
+            <!-- <script>
+                function loadScript(url,callback){
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    if(script.readyState){
+                        script.onreadystatechange = function (){
+                            if(script.readyState == 'complete' || 'loaded'){
+                                callback()
+                            }
+                        }
+                    }else{
+                        script.onload = function (){
+                            callback()
+                        }
+                    }
+                    script.src = url;
+                    document.head.appendChild(script)
+                }
+                // 传值的时候，callback的值写成一个嵌套匿名函数的形式，例 ：
+                //  loadScript('demo.js',function (){
+                // callback()
+                // }) 
+            </script> -->
+
+            <div style='width: 100px;height: 100px;background-color: red;'></div>
+
+            <script>
+                
+                console.log(document.readyState);
+                // document.onreadystatechange = function (){
+                //     console.log(document.readyState);
+                // }
+                // window.onload = function (){
+                //     console.log(document.readyState)
+                // }
+            </script>
+
+===========================================================================
+    JSON.stringify的用法
+            它可以接收3个参数   JSON.stringify(objName,[key]/function,'')
+            第一个参数用来接收对象的名字，指要转化的对象
+            第二个参数可以传函数方法执行，也可以传对象的key值，如果要传key值，
+        就必须用数组的方式，只显示这个数组中要求的key值对应的value值。
+            第三个参数传空格字符串，传入后可以按照缩进后的对象输出
+
+===============================================================================================
+========================================Es6 语法===============================================
+    Es6引入for of方法用来遍历对象，数组
+            for of用法与for in一样，但是可以弥补for in的不足，如果遍历对象是数组，数组本身也是对象
+        的一种：  var arr = [1,2,3,4,5]; arr.name = '测试'; 
+        for in输出的结果就是1,2,3,4,5,测试，跟原数组有些差别，而for of就是用来弥补这个的不足。
+
+    Es6新引入了一个定义变量的关键字 let
+        let声明过的内容，不能再作用域外使用，指的是var不能解决的for，while中定义的变量，
+        用了let，for循环和while循环就不能被外部的语句修改了，只能在循环内使用修改
+    
+    Es6解构赋值
+        Es5以前的解构赋值是这样的、
+            var arr = ['王路','李飞','青光','腾飞']
+            var x = arr[0], y = arr[1], z = arr[2], p = arr[3];
+        Es6的语法是这样的
+            var [x,y,z,p] = ['王路','李飞','青光','腾飞']
+        如果是多维数组，右值也要对应
+            var [x,[y,z]] = ['王路',['李飞','青光']]
+        也可以只赋值个别值
+            var [,,z] = ['王路','李飞','青光']
+        当解构赋值的是对象的时候
+            var obj = {
+                name : '王路',
+                age : 25,
+                sex : male,
+                hobby : 'surf the internet',
+                address : {
+                    city : '郑州',
+                    area : '中原区',
+                    street : '陇海路工人路'
+                }
+            }
+            var { name,age,sex,{area,street} } = obj;
+        如果不存在属性，则会返回undefined，也可以copy属性值到新的属性上
+            let {name,age:class } = obj;    //  新增的class的value值也是 25
+        解构赋值还可以使用默认值
+            var {name, single=true} = obj;  //  如果obj没有属性single，默认为true
+        特殊情况的时候，明明变量声明了，再赋值还是会报错，如果报错显示 ‘=’ 不在合法,
+        那就在他们外面加上小括号 ，像这样
+            {x,y} = {name:1,y:2,x:3} 改为( {x,y}={name:1,y:2,x:3} )             
+
+        函数若接收对象作为参数，也可以使用解构赋值形式把对象形式绑定到变量中
+            function displayDate( {year,month,day,hour=0} ){
+                return new Date(year + '-' + month + '-' + day + '-' + hour)
+            }
+            调用函数可以传入对象形式的
+                displayDate({year:2019,month:2,day:18,hour:23})
+                    // month默认是从0开始算的，比如3月的索引值就是2，要写2而不是3
+
+
+
+    Es6的新增两大数据类型 
+            Map类型和Set类型，两者都是构造函数的形式
+                Map是一组键值对结构，具有极快的查找速度。
+                    例如查找分数： var map = new Map()
+                        map.set(['王路',100])
+                        map.set(['李飞',99])    
+                        map.get('李飞')         //  获取分数 99
+                        map.delete(['李飞'])    //  删除key 李飞
+                        map.get('李飞')         //  获取李飞分数  undefined
+                        map.has('李飞')         //  存在key值为李飞   false
+                    也可以修改，    
+                        map.set(['王路'，99])
+                        map.get('王路')         //  分数 99
+                    因为一个key值只能对应一个value值，多次赋值会覆盖之前的value值
+                Set更像可以去重的数组，它的里面没有重复的值，重复的值会被自动过滤掉。
+            Map和Set都属于iterable类型
+</body>
+</html>
