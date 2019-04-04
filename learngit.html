@@ -16,6 +16,16 @@ Git是在linux操作系统上，用C语言实现的‘分布式版本管理工�
 配置 email ：git comfig --global user.email "你的邮箱"
 ========================================================
 
+Git提交缓存转义字符问题解决
+
+	git config --global core.autocrlf false
+
+Git拒绝master提交  解决办法：
+
+	git pull origin master --allow-unrelated-histories 
+<!-- 把远程仓库和本地仓库同步，消除差异 -->
+	然后从新 git push -u origin master
+
 
 第一步 ：创建本地版本库(Local)
 	mkdir	创建文件夹
